@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="verify-v1" content="9tSmkqhEItR2vb4NQ9111/akEBcEgiodn23Zbn8fLI0=" />
+    {% block meta %}{% endblock %}
+    <title>{% block title %}{% endblock %}</title>
+    <link href="{{ MEDIA_URL }}stylesheets/base.css" rel="stylesheet" type="text/css" media="screen, projection"/>
+    <!--[if IE]><link href="/stylesheets/blueprint/ie.css" rel="stylesheet" type="text/css" media="screen, projection"/><![endif]-->
+    <script src="http://maps.google.com/maps?file=api&amp;v=3&amp;key=ABQIAAAAK2d2m2MfzChgDmEOsSRtpRT_HF54SAlx3RYx4jDOTfQHuu2XchRdeFrWt9Y18l3q3_DjqTTcstY9WQ&amp;sensor=false" type="text/javascript"></script>
+    {% block map_script %}{% endblock %}
+</head>
+<body onload="initialize()" onunload="GUnload()">
+<div class="container">
+{% block header %}
+    <div class="span-6" style="padding-top: 8px; text-align: left;">
+        <a href="/"><img src="{{ MEDIA_URL }}images/logo.gif" alt="SC2 GeoMap Logo" title="SC2 Players around the World"/></a>
+    </div>
+    <div class="span-14" id="nav">
+        <ul>
+            {# {% block tab0 %}<li><a href="{% url main-index %}"><span>Home</span></a></li>{% endblock %} #}
+            {% block tab1 %}<li><a href="{% url main-recent-commented %}"><span>Commented</span></a></li>{% endblock %}
+            {# {% block tab2 %}<li><a href="{% url main-recent-updated %}"><span>Recent Updated</span></a></li>{% endblock %} #}
+            {% block tab3 %}<li><a href="{% url monitor-subscribe %}"><span>Monitor</span></a></li>{% endblock %}
+            {% block tab4 %}<li><a href="{% url main-search %}"><span>Search</span></a></li>{% endblock %}
+            {% block tababout %}<li><a href="{% url main-about %}"><span>About</span></a></li>{% endblock %}
+            {% block tab5 %}<li><a href="{% url player-create %}"><span>Add a Player</span></a></li>{% endblock %}
+        </ul>
+    </div>
+<div class="clear"></div>
+{% endblock %}
+
+{% block content %}
+{% endblock %}
+
+{% block footer %}
+    <div class="footer span-24">
+        <p>Copyright <a href="http://rommelrico.com">Rommel Rico</a> //
+        <a href="http://creativecommons.org/licenses/by/3.0/us/" title="Creative Commons Attribution">Some Rights Reserved</a> //
+        Designed by <a href="http://www.rommelrico.com">Rommel Rico</a> //
+        <a href="http://www.djangoproject.com/">Django powered</a> //
+        Hosted at <a href="http://www.webfaction.com/?affiliate=romri">WebFaction</a><br />
+        Full disclaimer to the authors and contributors if you use this site.<br />
+	 StarCraft II is a copyright of Blizzard and all that jazz.</p>
+    </div>
+{% endblock %}
+</div>
+
+</body>
+</html>
