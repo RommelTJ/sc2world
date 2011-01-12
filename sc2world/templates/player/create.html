@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block map_script %}
+    <script src="{% url main-icons-js %}" type="text/javascript"></script>
+    <script type="text/javascript">
+        var map = null;
+
+        // ----- define the GOverlay that show marker in the middle of map
+        function PlayerMarker(icon) { this.icon_ = icon; }
+        PlayerMarker.prototype = new GOverlay();
+        PlayerMarker.prototype.initialize = function(map) {
+            var div = document.createElement("div");
+            div.style.position = "absolute";
+            div.innerHTML = ""
+                + "<img style='position:absolute;' src='" + this.icon_.shadow + "'>"
+                + "<img style='position:absolute;' src='" + this.icon_.image + "'>";
+            this.div_ = div;
+            this.map_ = map;
+            map.getPane(G_MAP_MAP_PANE).appendChild(this.div_);
+        }
+        PlayerMarker.prototype.remove = function() { this.div_.parentNode.removeChild(this.div_); }
+        PlayerMarker.prototype.copy = function() { return new PlayerMarker(this.icon_); }
+        PlayerMarker.prototype.redraw = function(force) {
+            c = this.map_.fromLatLngToDivPixel(this.map_.getCenter());
+            this.div_.style.top = c.y - this.icon_.iconAnchor.y + "px";
+            this.div_.style.left = c.x - this.icon_.iconAnchor.x + "px";
+        }
+
+        // ----- setup map
+        function initialize() {
+            if (GBrowserIsCompatible()) {
+                map = new GMap2(document.getElementById("map_create"));
+                map.setCenter(
+                    new GLatLng(parseFloat(+"{{ request.POST.lat }}") || 23.9, parseFloat(+"{{ request.POST.lng }}") || -102.3),
+                    parseInt(+"{{ request.POST.zoom }}") || 2);
+                map.setUIToDefault();
+                map.disableScrollWheelZoom();
+                map.addOverlay(new PlayerMarker(eval("{{ request.POST.icon }}" || "G_DEFAULT_ICON")));
+                setupHandler();
+            }
+        }
+
+        // ----- setup event handler
+        function handleIcon(name, icon) {
+            map.clearOverlays();
+            map.addOverlay(new PlayerMarker(icon));
+            document.getElementById('id_icon').value = name;
+        }
+        function setupHandler() {
+            // handle icon
+            document.getElementById("id_icon").value = "{{ request.POST.icon }}" || "G_DEFAULT_ICON";
+            document.getElementById('id_icon_default').onclick = function() { handleIcon("G_DEFAULT_ICON", G_DEFAULT_ICON); }
+            document.getElementById('id_icon_protoss').onclick = function() { handleIcon("PROTOSS_ICON", PROTOSS_ICON); }
+            document.getElementById('id_icon_random').onclick = function() { handleIcon("RANDOM_ICON", RANDOM_ICON); }
+            document.getElementById('id_icon_terran').onclick = function() { handleIcon("TERRAN_ICON", TERRAN_ICON); }
+            document.getElementById('id_icon_zerg').onclick = function() { handleIcon("ZERG_ICON", ZERG_ICON); }
+
+            // handle lat and lng
+            document.getElementById("id_lat").value = map.getCenter().lat();
+            document.getElementById("id_lng").value = map.getCenter().lng();
+            GEvent.addListener(map, "moveend", function() {
+                document.getElementById("id_lat").value = map.getCenter().lat();
+                document.getElementById("id_lng").value = map.getCenter().lng();
+            });
+            document.getElementById("id_zoom").value = map.getZoom();
+            GEvent.addListener(map, "zoomend", function() {
+                document.getElementById("id_zoom").value = map.getZoom();
+            });
+        }
+    </script>
+{% endblock %}
+
+{% block title %}Add a Player{% endblock %}
+
+{% block tab5 %}<li><a class="active"><span>Add a Player</span></a></li>{% endblock %}
+
+{% block content %}
+    <div class="title span-24 last"><h1>Add a Player to the SC2 GeoMap</h1></div>
+    <form action="." method="post">{% csrf_token %}
+        <div class="label span-4">BNET Nick :</div>
+        <div class="field span-20 last">
+            {% if form.bnetnick.errors %}<span class="errors">{{ form.bnetnick.errors|join:" // " }}</span><br />{% endif %}
+            {{ form.bnetnick }}<br /><em>Provide the BattleNet2.0 Nickname. </em>
+        </div>
+
+        <div class="label span-4">Character Code :</div>
+        <div class="field span-20 last">
+            {% if form.charactercode.errors %}<span class="errors">{{ form.charactercode.errors|join:" // " }}</span><br />{% endif %}
+            {{ form.charactercode }}<br /><em>Provide the BattleNet2.0 Character code. <strong>Ex. 898</strong>.</em>
+        </div>
+
+        <div class="label span-4">Location: </div> 
+        <div id="map_create" class="span-20 last"></div>
+	 	<em>Drag the map to your location.</em>
+		<div class="span-3 last" id="nav-img">
+			<ul>
+				<li id="id_icon_default"><img src="{{ MEDIA_URL }}images/icons/marker.png"></li>
+				<li id="id_icon_protoss"><img src="{{ MEDIA_URL }}images/icons/protoss/image.png"></li>
+				<li id="id_icon_random"><img src="{{ MEDIA_URL }}images/icons/random/image.png"></li>
+				<li id="id_icon_terran"><img src="{{ MEDIA_URL }}images/icons/terran/image.png"></li>
+				<li id="id_icon_zerg"><img src="{{ MEDIA_URL }}images/icons/zerg/image.png"></li>
+			</ul>
+		</div>
+        <div class="span-24 last">{{ form.icon }} {{ form.lat }} {{ form.lng }} {{ form.zoom }}</div>
+
+        <div class="label span-4">Details :</div>
+        <div class="field span-20 last">
+            <em>
+                Please add any details. Ex: Looking for a LAN Party. <br />{{ form.details }}<br />
+                You can use the following to format your post:<br />
+                <span style="font-family:courier;">
+                &nbsp;&nbsp;_make the text italic_<br />
+                &nbsp;&nbsp;__make the text bold__<br />
+                &nbsp;&nbsp;![picture name](http://url_address_of_pic/pic.jpg/)<br />
+                &nbsp;&nbsp;[link name](http://url_address_of_link/link.html/)
+                </span>
+            </em>
+        </div>
+
+        <div class="label span-4">Your Name :</div>
+        <div class="field span-20 last">
+            {% if form.author.errors %}<span class="errors">{{ form.author.errors|join:" // " }}</span><br />{% endif %}
+            {{ form.author }}&nbsp;&nbsp;&nbsp;<em>Required. Put fake name if you want.</em>
+        </div>
+
+        <div class="label span-4">Password :</div>
+        <div class="field span-20 last">
+            {% if form.password.errors %}<span class="errors">{{ form.password.errors|join:" // " }}</span><br />{% endif %}
+            {{ form.password }}&nbsp;&nbsp;&nbsp;<em>This is used only if you want to edit the post in the future.</em>
+        </div>
+        <div class="label span-4">Confirm Password :</div>
+        <div class="field span-20 last">
+            {% if form.password2.errors %}<span class="errors">{{ form.password2.errors|join:" // " }}</span><br />{% endif %}
+            {{ form.password2 }}&nbsp;&nbsp;&nbsp;<em>Type the password again for confirmation.</em>
+        </div>
+
+        <div class="label span-4">&nbsp;</div>
+        <div class="field span-20 last">
+            <input type="submit" value="Add It!">&nbsp;&nbsp;&nbsp;&nbsp;<a href="{% url main-index %}">Cancel</a>
+        </div>
+    </form>
+{% endblock %}
