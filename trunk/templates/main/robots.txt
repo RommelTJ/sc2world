@@ -1,0 +1,7 @@
+User-Agent: *
+Disallow: /player/create/
+Disallow: /player/update/
+Disallow: /monitor/subscribe/*
+Disallow: /monitor/info/*
+Disallow: /monitor/unsubscribe/*
+Allow: /

@@ -1,0 +1,23 @@
+Hi,
+
+There are players reported in your monitored area.
+
+{% for player in players %}
+* {{ player.bnetnick }}
+  {{ player.charactercode }} 
+  http://www.sc2geomap.com{{ player.get_absolute_url }}
+{% endfor %}
+
+cheers,
+SC2 GeoMap
+
+http://www.sc2geomap.com/
+
+
+* You are receiving this email because you have subscribed to SC2 GeoMap Monitor service.
+
+You can view your subscription information using the link below:
+http://www.sc2geomap.com{% url monitor-info uuid %}
+
+You can, at anytime, unsubscribe using the link below:
+http://www.sc2geomap.com{%url monitor-unsubscribe uuid %}
