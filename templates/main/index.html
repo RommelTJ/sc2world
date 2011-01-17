@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load comments %}
+
+{% block meta %}
+    <meta name="description" content="SC2 GeoMap">
+{% endblock %}
+
+{% block map_script %}
+    <script src="http://gmaps-utility-library.googlecode.com/svn/trunk/markermanager/1.1/src/markermanager_packed.js" type="text/javascript"></script>
+    <script src="{% url main-icons-js %}" type="text/javascript"></script>
+    <script type="text/javascript">
+    //<![CDATA[
+        var map = null;
+        var mgr = null;
+
+        // ----- initialize the map
+        function initialize() {
+            if (GBrowserIsCompatible()) {
+                map = new GMap2(document.getElementById("map_index"));
+                map.setCenter(new GLatLng(23.9, -102.3), 2);
+                map.setUIToDefault();
+                map.disableScrollWheelZoom();
+                window.setTimeout(setupMarkers, 0);
+            }
+        }
+
+        // ----- create markers
+        function createMarker(text, lat, lng, icon) {
+            marker = new GMarker(new GLatLng(lat, lng), icon);
+            marker.bindInfoWindow(text);
+            return marker;
+        }
+
+        // ----- setup markers
+        function setupMarkers() {
+            var batch = [];
+            {% for player in players reversed %}
+                {% get_comment_count for player as comment_count %}
+                batch.push(createMarker(
+                    "<span class='headlineinfo'>"
+                    + "<a href='{{ player.get_absolute_url }}'>{{player.bnetnick}}</a></span><br/>"
+                    + "<span class='sublineinfo'>Character Code: {{ player.charactercode }}<br />"
+                    {% if comment_count %}
+                        + "// {{ comment_count }} comment{{ comment_count|pluralize }}"
+                    {% endif %}
+                    + "</span>",
+                    {{ player.lat }}, {{ player.lng }}, {{ player.icon }}))
+            {% endfor %}
+
+            mgr = new MarkerManager(map);
+            mgr.addMarkers(batch, 0);
+            mgr.refresh();
+        }
+    //]]>
+    </script>
+{% endblock %}
+
+{% block title %}SC2 GeoMap {% endblock %}
+
+{% block tab0 %}<li><a class="active"><span>Home</span></a></li>{% endblock %}
+
+{% block content %}
+    <div class="title span-14">
+        <h2>Recently Added SC2 Players</h2>
+    </div>
+
+    <div class="stats span-10 last">
+        Showing <strong>{{ players.count }}</strong> of <strong>{{ player_total }}</strong> Players
+    </div>
+    <div id="map_index" class="span-24 last"></div>
+
+    <div class="span-18">
+    {% for player in last_players %}
+        {% get_comment_count for player as comment_count %}
+        <span class="linelist">
+            <h2><a href="{{ player.get_absolute_url }}">{{ player.bnetnick }}</a></h2>
+            Character Code: {{ player.charactercode }}
+            {% if comment_count %}
+                // {{ comment_count }} comment{{ comment_count|pluralize }}
+            {% endif %}
+        </span><br /><br />
+    {% endfor %}
+    </div>
+
+{% endblock %}
