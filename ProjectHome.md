@@ -1,0 +1,1 @@
+A map where players voluntarily disclose their geographical location. Furthermore, SC2 GeoMaps wants to provide a visual representation of SC2 Players so that businesses, advertisers, and others who otherwise support eSports can better target their markets.
